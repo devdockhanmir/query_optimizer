@@ -1,0 +1,16 @@
+# Python files
+*.pyc
+__pycache__/
+
+# Environment files
+.env
+venv/
+query_optimizer_env/
+
+# Logs and databases
+*.log
+*.db
+
+# System files
+.DS_Store
+Thumbs.db
