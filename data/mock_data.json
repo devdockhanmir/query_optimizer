@@ -1,0 +1,10 @@
+{
+    "SalesOrderHeader": [
+        {"CustomerID": 1, "TotalDue": 15000},
+        {"CustomerID": 2, "TotalDue": 8000}
+    ],
+    "Customer": [
+        {"CustomerID": 1, "FirstName": "Alice", "LastName": "Smith"},
+        {"CustomerID": 2, "FirstName": "Bob", "LastName": "Johnson"}
+    ]
+}

@@ -1,42 +1,20 @@
-import pyodbc
+from optimizer.query_parser import RelationalAlgebraNode, RelationalAlgebraTree
+from optimizer.transformation import apply_transformation_rules
 
-def connect_and_query():
-    connection_string = (
-        "Driver={SQL Server};"
-        "Server=Dark/SQLEXPRESS,1433;"  
-        "Database=AdventureWorks2022;"  
-        "Trusted_Connection=yes;"
-    )
+# Define the tree for a test query
+sales_order_header = RelationalAlgebraNode("RELATION", "SalesOrderHeader")
+customer = RelationalAlgebraNode("RELATION", "Customer")
 
-    try:
-        conn = pyodbc.connect(connection_string)
-        print("Connection successful!")
+join_node = RelationalAlgebraNode("JOIN", "CustomerID = CustomerID", [sales_order_header, customer])
+select_node = RelationalAlgebraNode("SELECT", "TotalDue > 10000", [join_node])
+project_node = RelationalAlgebraNode("PROJECT", "FirstName, LastName", [select_node])
 
-        # Create a cursor and execute a test query
-        cursor = conn.cursor()
-        test_query = """
-        SELECT TOP 5 FirstName, LastName
-        FROM Person.Person;
-        """
-        cursor.execute(test_query)
+# Create the relational algebra tree
+tree = RelationalAlgebraTree(project_node)
+print("Original Query Plan:")
+tree.display()
 
-        # Fetch results
-        columns = [column[0] for column in cursor.description]
-        rows = cursor.fetchall()
-
-        # Print the results
-        print(columns)
-        for row in rows:
-            print(row)
-
-    except Exception as e:
-        print(f"Error: {e}")
-
-    finally:
-        # Close connection
-        if 'conn' in locals() and conn:
-            conn.close()
-            print("Connection closed.")
-
-if __name__ == "__main__":
-    connect_and_query()
+# Apply transformations
+optimized_tree = apply_transformation_rules(tree)
+print("\nOptimized Query Plan:")
+optimized_tree.display()
