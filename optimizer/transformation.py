@@ -1,36 +1,44 @@
-from optimizer.query_parser import RelationalAlgebraTree, RelationalAlgebraNode
+# optimizer/transformation.py
 
-def predicate_pushdown(node):
+from .query_parser import LogicalJoin, LogicalScan, LogicalSelect
+
+def apply_join_commutativity(expr):
     """
-    Apply predicate pushdown transformation.
-    Moves SELECT conditions closer to the relevant relation.
+    If expr is LogicalJoin(R,S), produce LogicalJoin(S,R).
+    Preserve the same join_condition if possible, 
+    but we might have to flip references from R.col to S.col, etc. 
+    We'll keep it simple: just swap the child nodes, keep cond the same.
     """
-    if node.operation == "SELECT" and len(node.children) == 1:
-        child = node.children[0]
-        
-        if child.operation == "JOIN":
-            # Extract the condition and check if it applies to one of the JOIN children
-            condition = node.condition
-            left_child, right_child = child.children
-            
-            # Check if the condition applies to the left child
-            if "TotalDue" in condition:  # Adjust this to parse column references dynamically
-                # Push the SELECT condition onto the left child
-                new_select = RelationalAlgebraNode("SELECT", condition, [left_child])
-                new_join = RelationalAlgebraNode("JOIN", child.condition, [new_select, right_child])
-                return new_join
+    if not isinstance(expr, LogicalJoin):
+        return []
+    # swap children
+    swapped = LogicalJoin(expr.right, expr.left, expr.join_condition)
+    return [swapped]
 
-    # Recursively apply predicate pushdown on child nodes
-    if node.children:
-        node.children = [predicate_pushdown(child) for child in node.children]
-    
-    return node
+def get_logical_transformations(expr):
+    """Collect all transformations for an expression (and sub-expressions)."""
+    new_exprs = []
 
+    if isinstance(expr, LogicalSelect):
+        # transformations on the child
+        child_transforms = get_logical_transformations(expr.child)
+        new_exprs.extend(
+            [LogicalSelect(ct, expr.predicate) for ct in child_transforms]
+        )
+        # no direct rule for select yet
+    elif isinstance(expr, LogicalJoin):
+        # commutativity
+        new_exprs.extend(apply_join_commutativity(expr))
 
+        # transformations on sub-children
+        left_trans = get_logical_transformations(expr.left)
+        right_trans = get_logical_transformations(expr.right)
 
-def apply_transformation_rules(tree):
-    """
-    Apply all transformation rules to the relational algebra tree.
-    """
-    root = predicate_pushdown(tree.root)
-    return RelationalAlgebraTree(root)
+        # gather new combos
+        for lt in left_trans:
+            new_exprs.append(LogicalJoin(lt, expr.right, expr.join_condition))
+        for rt in right_trans:
+            new_exprs.append(LogicalJoin(expr.left, rt, expr.join_condition))
+
+    # each sub-expression might recursively produce new transformations
+    return new_exprs

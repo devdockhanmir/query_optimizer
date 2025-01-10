@@ -1,1 +1,7 @@
 graphviz
+numpy
+pandas
+scikit-learn
+
+# For SQL parsing or other tasks (optional):
+sqlparse

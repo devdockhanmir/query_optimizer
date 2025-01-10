@@ -1,5 +1,8 @@
--- Test Query 1
-SELECT FirstName, LastName, SUM(TotalDue) AS TotalSpent
-FROM SalesOrderHeader
-JOIN Customer ON SalesOrderHeader.CustomerID = Customer.CustomerID
-WHERE TotalDue > 10000;
+-- Single table filter
+SELECT * FROM R WHERE col1 < 15;
+
+-- Two-table join with equi-join
+SELECT * FROM R, S WHERE R.col1 = S.colA;
+
+-- Two-table join with filter
+SELECT * FROM R, S WHERE R.col1 = S.colA AND R.col2 < 250;

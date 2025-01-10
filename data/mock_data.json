@@ -1,10 +1,13 @@
 {
-    "SalesOrderHeader": [
-        {"CustomerID": 1, "TotalDue": 15000},
-        {"CustomerID": 2, "TotalDue": 8000}
+  "tables": {
+    "R": [
+      {"col1": 10,  "col2": 100},
+      {"col1": 20,  "col2": 200},
+      {"col1": 15,  "col2": 250}
     ],
-    "Customer": [
-        {"CustomerID": 1, "FirstName": "Alice", "LastName": "Smith"},
-        {"CustomerID": 2, "FirstName": "Bob", "LastName": "Johnson"}
+    "S": [
+      {"colA": 15, "colB": 150},
+      {"colA": 25, "colB": 250}
     ]
+  }
 }
