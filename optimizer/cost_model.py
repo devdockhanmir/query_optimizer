@@ -279,7 +279,7 @@ def partial_retrain_if_needed(table_name, col_idx, val, actual_fraction):
     pred_fraction = model.predict([[col_idx, val]])[0]
 
     # threshold
-    if abs(pred_fraction - actual_fraction) > 0.5:
+    if abs(pred_fraction - actual_fraction) > 0.9:
         TRAINING_DATA[table_name]["X"].append([col_idx, val])
         TRAINING_DATA[table_name]["y"].append(actual_fraction)
 
